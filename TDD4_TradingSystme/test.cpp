@@ -12,8 +12,13 @@ public:
 	MOCK_METHOD(bool, login, (string id, string pw), (override));
 	MOCK_METHOD(bool, buy, (int stockCode, int price, int qty), (override));
 	MOCK_METHOD(bool, sell, (int stockCode, int price, int qty), (override));
-	MOCK_METHOD(bool, getPrice, (int stockCode), (override));
+	MOCK_METHOD(int, getPrice, (int stockCode), (override));
 	MOCK_METHOD(string, getID, (), (override));
+};
+
+class MockDriver : public Driver {
+public:
+	MOCK_METHOD(int, getPrice, (int), (override));
 };
 
 class TradingSystemFixture : public Test {
@@ -172,43 +177,75 @@ TEST_F(TradingSystemFixture, Login_Nemo_Success) {
 
 /// 5.1 KIWER
 TEST_F(TradingSystemFixture, GetPrice_Kiwer_Fail_Invalid_Code) {
-	EXPECT_CALL(stockmock, getPrice)
-		.Times(1)
-		.WillOnce(Return(ZERO));
+	// arrange
+	NiceMock<MockDriver> mockDriver;
+	EXPECT_CALL(mockDriver, getPrice(INVALID_CODE))
+		.WillRepeatedly(Return(ZERO));
 
-	stockmock.selectStockBrocker(KIWER);
+	BrokerManager brokerManager;
+	brokerManager.setDriver(&mockDriver);
 
-	EXPECT_EQ(stockmock.getPrice(INVALID_CODE), ZERO);
+	// act
+	brokerManager.selectStockBrocker(KIWER);
+	int actual = brokerManager.getPrice(INVALID_CODE);
+
+
+	// assert
+	EXPECT_EQ(actual, ZERO);
 }
 
 TEST_F(TradingSystemFixture, GetPrice_Kiwer_Success) {
-	EXPECT_CALL(stockmock, getPrice)
-		.Times(1)
-		.WillOnce(Return(PRICE));
+	// arrange
+	NiceMock<MockDriver> mockDriver;
+	EXPECT_CALL(mockDriver, getPrice(STOCK_CODE))
+		.WillRepeatedly(Return(PRICE));
 
-	stockmock.selectStockBrocker(KIWER);
+	BrokerManager brokerManager;
+	brokerManager.setDriver(&mockDriver);
 
-	EXPECT_EQ(stockmock.getPrice(STOCK_CODE), PRICE);
+	// act
+	brokerManager.selectStockBrocker(KIWER);
+	int actual = brokerManager.getPrice(STOCK_CODE);
+
+
+	// assert
+	EXPECT_EQ(actual, PRICE);
 }
 
 
 /// 5.2 NEMO
 TEST_F(TradingSystemFixture, GetPrice_Nemo_Fail_Invalid_Code) {
-	EXPECT_CALL(stockmock, getPrice)
-		.Times(1)
-		.WillOnce(Return(ZERO));
+	// arrange
+	NiceMock<MockDriver> mockDriver;
+	EXPECT_CALL(mockDriver, getPrice(INVALID_CODE))
+		.WillRepeatedly(Return(ZERO));
 
-	stockmock.selectStockBrocker(NEMO);
+	BrokerManager brokerManager;
+	brokerManager.setDriver(&mockDriver);
 
-	EXPECT_EQ(stockmock.getPrice(INVALID_CODE), 0);
+	// act
+	brokerManager.selectStockBrocker(NEMO);
+	int actual = brokerManager.getPrice(INVALID_CODE);
+
+
+	// assert
+	EXPECT_EQ(actual, ZERO);
 }
 
 TEST_F(TradingSystemFixture, GetPrice_Nemo_Success) {
-	EXPECT_CALL(stockmock, getPrice)
-		.Times(1)
-		.WillOnce(Return(PRICE));
+	// arrange
+	NiceMock<MockDriver> mockDriver;
+	EXPECT_CALL(mockDriver, getPrice(STOCK_CODE))
+		.WillRepeatedly(Return(PRICE));
 
-	stockmock.selectStockBrocker(NEMO);
+	BrokerManager brokerManager;
+	brokerManager.setDriver(&mockDriver);
 
-	EXPECT_EQ(stockmock.getPrice(STOCK_CODE), PRICE);
+	// act
+	brokerManager.selectStockBrocker(NEMO);
+	int actual = brokerManager.getPrice(STOCK_CODE);
+
+
+	// assert
+	EXPECT_EQ(actual, PRICE);
 }
