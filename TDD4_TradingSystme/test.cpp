@@ -1,50 +1,118 @@
 #include <iostream>
 #include <stdexcept>
 #include "gmock/gmock.h"
+#include "StockerBrocker.cpp"
 
 using namespace testing;
 using namespace std;
 
-class TradingSystemFixture : public Test {
+class StockMock : public IStockBroker {
 public:
-
+	MOCK_METHOD(bool, selectStockBrocker, (string id), (override));
+	MOCK_METHOD(bool, login, (string id, string pw), (override));
+	MOCK_METHOD(bool, buy, (int stockCode, int price, int qty), (override));
+	MOCK_METHOD(bool, sell, (int stockCode, int price, int qty), (override));
+	MOCK_METHOD(bool, getPrice, (int stockCode), (override));
 };
 
-/* Select Stock */
-TEST_F(TradingSystemFixture, Select_Stock_Fail) {
+class TradingSystemFixture : public Test {
+public:
+	const string INVALID = "INVALID";
+	const string KIWER = "KIWER";
+	const string NEMO = "NEMO";
+	const string USER = "USER";
+	const string PASSWORD = "PASSWORD";
 
-	// EXPECT_THROW( getStock(), runtime_error);
+	StockMock stockmock;
+};
+
+///////////////  1. Select Stock  ///////////////
+
+TEST_F(TradingSystemFixture, Select_Stock_Fail) {
+	EXPECT_CALL(stockmock, selectStockBrocker)
+		.Times(1)
+		.WillOnce(Return(false));
+
+	EXPECT_THROW(
+		{ stockmock.selectStockBrocker(INVALID); },
+		runtime_error);
 }
 
 TEST_F(TradingSystemFixture, Select_Kiwer_Success) {
-
-	// EXPECT_EQ(getStock(), string{"KIWER is selected"});
+	stockmock.selectStockBrocker(KIWER);
+	//EXPECT_EQ(stockmock.getID(), KIWER);
 }
 
 TEST_F(TradingSystemFixture, Select_Nemo_Success) {
+	EXPECT_CALL(stockmock, selectStockBrocker)
+		.Times(1);
 
-	// EXPECT_EQ(getStock(), string{"NEMO is selected"});
+	stockmock.selectStockBrocker(NEMO);
+	//EXPECT_EQ(stockmock.getID(), NEMO);
 }
 
 
 
-/* Login */
-TEST_F(TradingSystemFixture, Login_Kiwer_Fail) {
+///////////////     2. Login     ///////////////
+TEST_F(TradingSystemFixture, Login_Kiwer_Fail_Invalid_UserID) {
+	EXPECT_CALL(stockmock, login)
+		.Times(1)
+		.WillOnce(Return(false));
+	stockmock.selectStockBrocker(KIWER);
 
-	// EXPECT_THROW( login(), runtime_error);
+	EXPECT_EQ(stockmock.login(INVALID, PASSWORD), false);
+}
+
+TEST_F(TradingSystemFixture, Login_Kiwer_Fail_Invalid_Password) {
+	EXPECT_CALL(stockmock, login)
+		.Times(1)
+		.WillOnce(Return(false));
+
+
+	stockmock.selectStockBrocker(KIWER);
+
+	EXPECT_EQ(stockmock.login(USER, INVALID), false);
 }
 
 TEST_F(TradingSystemFixture, Login_Kiwer_Success) {
+	EXPECT_CALL(stockmock, login)
+		.Times(1)
+		.WillOnce(Return(true));
 
-	// EXPECT_EQ(login(), "KIWER Login Success");
+
+	stockmock.selectStockBrocker(KIWER);
+
+	EXPECT_EQ(stockmock.login(USER, PASSWORD), true);
+}
+TEST_F(TradingSystemFixture, Login_Nemo_Fail_Invalid_UserID) {
+	EXPECT_CALL(stockmock, login)
+		.Times(1)
+		.WillOnce(Return(false));
+
+
+	stockmock.selectStockBrocker(NEMO);
+
+	EXPECT_EQ(stockmock.login(INVALID, PASSWORD), false);
 }
 
-TEST_F(TradingSystemFixture, Login_Nemo_Fail) {
+TEST_F(TradingSystemFixture, Login_Nemo_Fail_Invalid_Password) {
+	EXPECT_CALL(stockmock, login)
+		.Times(1)
+		.WillOnce(Return(false));
 
-	// EXPECT_THROW( login(), runtime_error);
+
+	stockmock.selectStockBrocker(NEMO);
+
+	EXPECT_EQ(stockmock.login(USER, INVALID), false);
 }
 
 TEST_F(TradingSystemFixture, Login_Nemo_Success) {
+	EXPECT_CALL(stockmock, login)
+		.Times(1)
+		.WillOnce(Return(true));
 
-	// EXPECT_EQ(login(), "Nemo Login Success");
+
+	stockmock.selectStockBrocker(NEMO);
+
+	EXPECT_EQ(stockmock.login(USER, PASSWORD), true);
 }
