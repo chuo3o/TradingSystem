@@ -1,4 +1,5 @@
 #pragma once
+#include <iostream>
 #include <string>
 #include <stdexcept>
 
@@ -22,7 +23,6 @@ class BrokerManager : public IStockBroker
 {
 
 public:
-
     void selectStockBrocker(string id) { 
 
         if (id == KIWER)
@@ -40,7 +40,17 @@ public:
     }
     bool login(string id, string pw) { return false; }
     bool buy(int stockCode, int price, int qty) { return false; }
-    bool sell(int stockCode, int price, int qty) { return false; }
+    bool sell(int stockCode, int price, int qty) {
+        if (stockCode == 0 || price <= 0 || qty <= 0) return false;
+
+        if (ID == KIWER) {
+            std::cout << stockCode << " : Sell stock ( " << price << " * " << qty << ")\n";
+        }
+        else if (ID == NEMO) {
+            std::cout << "[NEMO]" << stockCode << " sell stock ( price : " << price << " ) * ( count : " << qty << ")\n";
+        }
+        return true;
+    }
     bool getPrice(int stockCode) { return false; }
     string getID() {
         return ID;
