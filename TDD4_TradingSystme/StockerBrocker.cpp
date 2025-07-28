@@ -15,7 +15,7 @@ public:
 class IBrocker
 {
 public:
-    virtual IStocker* selectStockBrocker(int a) = 0;
+    virtual IStocker* selectStockBrocker(string id) = 0;
 };
 
 
@@ -23,7 +23,7 @@ class StockerBrocker : public IStocker, public IBrocker
 {
 
 public:
-    IStocker* selectStockBrocker(int a) {}
+    IStocker* selectStockBrocker(string id) {}
     bool login(string id, string pw) {}
     bool buy(int stockCode, int price, int qty) {}
     bool sell(int stockCode, int price, int qty) {}
