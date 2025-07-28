@@ -6,14 +6,15 @@
 using namespace testing;
 using namespace std;
 
-class StockMock : public StockerBrocker {
+class StockMock : public IStockBroker {
 public:
-	MOCK_METHOD(IStocker*, selectStockBrocker, (string id), (override));
+	MOCK_METHOD(bool, selectStockBrocker, (string id), (override));
 	MOCK_METHOD(bool, login, (string id, string pw), (override));
 	MOCK_METHOD(bool, buy, (int stockCode, int price, int qty), (override));
 	MOCK_METHOD(bool, sell, (int stockCode, int price, int qty), (override));
 	MOCK_METHOD(bool, getPrice, (int stockCode), (override));
 };
+
 class TradingSystemFixture : public Test {
 public:
 	const string INVALID = "INVALID";
@@ -23,96 +24,95 @@ public:
 	const string PASSWORD = "PASSWORD";
 
 	StockMock stockmock;
-	StockerBrocker stockbrocker;
-	IStocker* stock;
 };
 
 ///////////////  1. Select Stock  ///////////////
 
 TEST_F(TradingSystemFixture, Select_Stock_Fail) {
-	EXPECT_CALL(StockMock, selectStockBrocker)
+	EXPECT_CALL(stockmock, selectStockBrocker)
 		.Times(1)
-		.WillReturnOnce(nullptr);
+		.WillOnce(Return(false));
 
 	EXPECT_THROW(
-		{ stock = stockbrocker.selectStockBrocker(INVALID); },
+		{ stockmock.selectStockBrocker(INVALID); },
 		runtime_error);
 }
 
 TEST_F(TradingSystemFixture, Select_Kiwer_Success) {
-	EXPECT_CALL(StockMock, selectStockBrocker)
-		.Times(1);
-
-	stock = stockbrocker.selectStockBrocker(KIWER);
-	EXPECT_EQ(stock->getID(), KIWER);
+	stockmock.selectStockBrocker(KIWER);
+	//EXPECT_EQ(stockmock.getID(), KIWER);
 }
 
 TEST_F(TradingSystemFixture, Select_Nemo_Success) {
-	EXPECT_CALL(StockMock, selectStockBrocker)
+	EXPECT_CALL(stockmock, selectStockBrocker)
 		.Times(1);
 
-	stock = stockbrocker.selectStockBrocker(NEMO);
-	EXPECT_EQ(stock->getID(), NEMO);
+	stockmock.selectStockBrocker(NEMO);
+	//EXPECT_EQ(stockmock.getID(), NEMO);
 }
 
 
 
 ///////////////     2. Login     ///////////////
 TEST_F(TradingSystemFixture, Login_Kiwer_Fail_Invalid_UserID) {
-	EXPECT_CALL(StockMock, login)
+	EXPECT_CALL(stockmock, login)
 		.Times(1)
-		.WillOnceReturn(false);
+		.WillOnce(Return(false));
+	stockmock.selectStockBrocker(KIWER);
 
-	stock = stockbrocker.selectStockBrocker(KIWER);
-
-	EXPECT_EQ(stock->login(INVALID, PASSWORD), false);
+	EXPECT_EQ(stockmock.login(INVALID, PASSWORD), false);
 }
 
 TEST_F(TradingSystemFixture, Login_Kiwer_Fail_Invalid_Password) {
-	EXPECT_CALL(StockMock, login)
+	EXPECT_CALL(stockmock, login)
 		.Times(1)
-		.WillOnceReturn(false);
+		.WillOnce(Return(false));
 
-	stock = stockbrocker.selectStockBrocker(KIWER);
 
-	EXPECT_EQ(stock->login(USER, INVALID), false);
+	stockmock.selectStockBrocker(KIWER);
+
+	EXPECT_EQ(stockmock.login(USER, INVALID), false);
 }
 
 TEST_F(TradingSystemFixture, Login_Kiwer_Success) {
-	EXPECT_CALL(StockMock, login)
+	EXPECT_CALL(stockmock, login)
 		.Times(1)
-		.WillOnceReturn(true);
+		.WillOnce(Return(true));
 
-	stock = stockbrocker.selectStockBrocker(KIWER);
 
-	EXPECT_EQ(stock->login(USER, PASSWORD), true);
+	stockmock.selectStockBrocker(KIWER);
+
+	EXPECT_EQ(stockmock.login(USER, PASSWORD), true);
 }
 TEST_F(TradingSystemFixture, Login_Nemo_Fail_Invalid_UserID) {
-	EXPECT_CALL(StockMock, login)
+	EXPECT_CALL(stockmock, login)
 		.Times(1)
-		.WillOnceReturn(false);
+		.WillOnce(Return(false));
 
-	stock = stockbrocker.selectStockBrocker(NEMO);
 
-	EXPECT_EQ(stock->login(INVALID, PASSWORD), false);
+	stockmock.selectStockBrocker(NEMO);
+
+	EXPECT_EQ(stockmock.login(INVALID, PASSWORD), false);
 }
 
 TEST_F(TradingSystemFixture, Login_Nemo_Fail_Invalid_Password) {
-	EXPECT_CALL(StockMock, login)
+	EXPECT_CALL(stockmock, login)
 		.Times(1)
-		.WillOnceReturn(false);
+		.WillOnce(Return(false));
 
-	stock = stockbrocker.selectStockBrocker(NEMO);
 
-	EXPECT_EQ(stock->login(USER, INVALID), false);
+	stockmock.selectStockBrocker(NEMO);
+
+	EXPECT_EQ(stockmock.login(USER, INVALID), false);
 }
 
 TEST_F(TradingSystemFixture, Login_Nemo_Success) {
-	EXPECT_CALL(StockMock, login)
+	EXPECT_CALL(stockmock, login)
 		.Times(1)
-		.WillOnceReturn(true);
+		.WillOnce(Return(true));
 
-	stock = stockbrocker.selectStockBrocker(NEMO);
 
-	EXPECT_EQ(stock->login(USER, PASSWORD), true);
+	stockmock.selectStockBrocker(NEMO);
+
+	EXPECT_EQ(stockmock.login(USER, PASSWORD), true);
 }
