@@ -186,7 +186,7 @@ TEST_F(TradingSystemFixture, GetPrice_Kiwer_Fail_Invalid_Code) {
 	brokerManager.setDriver(&mockDriver);
 
 	// act
-	brokerManager.selectStockBrocker(KIWER);
+	brokerManager.selectStockBroker(KIWER);
 	int actual = brokerManager.getPrice(INVALID_CODE);
 
 
@@ -204,7 +204,7 @@ TEST_F(TradingSystemFixture, GetPrice_Kiwer_Success) {
 	brokerManager.setDriver(&mockDriver);
 
 	// act
-	brokerManager.selectStockBrocker(KIWER);
+	brokerManager.selectStockBroker(KIWER);
 	int actual = brokerManager.getPrice(STOCK_CODE);
 
 
@@ -224,7 +224,7 @@ TEST_F(TradingSystemFixture, GetPrice_Nemo_Fail_Invalid_Code) {
 	brokerManager.setDriver(&mockDriver);
 
 	// act
-	brokerManager.selectStockBrocker(NEMO);
+	brokerManager.selectStockBroker(NEMO);
 	int actual = brokerManager.getPrice(INVALID_CODE);
 
 
@@ -242,7 +242,7 @@ TEST_F(TradingSystemFixture, GetPrice_Nemo_Success) {
 	brokerManager.setDriver(&mockDriver);
 
 	// act
-	brokerManager.selectStockBrocker(NEMO);
+	brokerManager.selectStockBroker(NEMO);
 	int actual = brokerManager.getPrice(STOCK_CODE);
 
 
