@@ -4,6 +4,10 @@
 
 using std::string;
 
+struct Driver {
+  virtual int getPrice(int stockCode) = 0;
+};
+
 class IStockBroker
 {
 public:
@@ -15,7 +19,7 @@ public:
     virtual bool login(string id, string pw) = 0;
     virtual bool buy(int stockCode, int price, int qty) = 0;
     virtual bool sell(int stockCode, int price, int qty) = 0;
-    virtual bool getPrice(int stockCode) = 0;
+    virtual int getPrice(int stockCode) = 0;
     virtual string getID() = 0;
 };
 
@@ -41,12 +45,20 @@ public:
     bool login(string id, string pw) { return false; }
     bool buy(int stockCode, int price, int qty) { return false; }
     bool sell(int stockCode, int price, int qty) { return false; }
-    bool getPrice(int stockCode) { return false; }
+
+    int getPrice(int stockCode) {
+      return driver->getPrice(stockCode);
+    }
+
     string getID() {
         return ID;
     }
 
+    void setDriver(Driver* driver) {
+      this->driver = driver;
+    }
+
 private:
     string ID;
-
+    Driver* driver;
 };

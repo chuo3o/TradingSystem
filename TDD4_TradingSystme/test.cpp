@@ -12,8 +12,13 @@ public:
 	MOCK_METHOD(bool, login, (string id, string pw), (override));
 	MOCK_METHOD(bool, buy, (int stockCode, int price, int qty), (override));
 	MOCK_METHOD(bool, sell, (int stockCode, int price, int qty), (override));
-	MOCK_METHOD(bool, getPrice, (int stockCode), (override));
+	MOCK_METHOD(int, getPrice, (int stockCode), (override));
 	MOCK_METHOD(string, getID, (), (override));
+};
+
+class MockDriver : public Driver {
+public:
+	MOCK_METHOD(int, getPrice, (int), (override));
 };
 
 class TradingSystemFixture : public Test {
@@ -23,6 +28,13 @@ public:
 	const string NEMO = "NEMO";
 	const string USER = "USER";
 	const string PASSWORD = "PASSWORD";
+	const int INVALID_CODE = 0;
+	const int STOCK_CODE = 1;
+	const int PRICE = 10000;
+	const int QUANTITY = 10;
+	const int ZERO = 0;
+	const int OVER = 10000;
+
 
 	StockMock stockmock;
 
@@ -159,4 +171,81 @@ TEST_F(TradingSystemFixture, Login_Nemo_Fail_Invalid_Password) {
 TEST_F(TradingSystemFixture, Login_Nemo_Success) {
 	std::string loginMsg = getLoginMsg(true, NEMO, USER, PASSWORD);
 	EXPECT_EQ(loginMsg, getNemoLoginMsg(USER, PASSWORD));
+}
+
+///////////////     5. Get Price     ///////////////
+
+/// 5.1 KIWER
+TEST_F(TradingSystemFixture, GetPrice_Kiwer_Fail_Invalid_Code) {
+	// arrange
+	NiceMock<MockDriver> mockDriver;
+	EXPECT_CALL(mockDriver, getPrice(INVALID_CODE))
+		.WillRepeatedly(Return(ZERO));
+
+	BrokerManager brokerManager;
+	brokerManager.setDriver(&mockDriver);
+
+	// act
+	brokerManager.selectStockBroker(KIWER);
+	int actual = brokerManager.getPrice(INVALID_CODE);
+
+
+	// assert
+	EXPECT_EQ(actual, ZERO);
+}
+
+TEST_F(TradingSystemFixture, GetPrice_Kiwer_Success) {
+	// arrange
+	NiceMock<MockDriver> mockDriver;
+	EXPECT_CALL(mockDriver, getPrice(STOCK_CODE))
+		.WillRepeatedly(Return(PRICE));
+
+	BrokerManager brokerManager;
+	brokerManager.setDriver(&mockDriver);
+
+	// act
+	brokerManager.selectStockBroker(KIWER);
+	int actual = brokerManager.getPrice(STOCK_CODE);
+
+
+	// assert
+	EXPECT_EQ(actual, PRICE);
+}
+
+
+/// 5.2 NEMO
+TEST_F(TradingSystemFixture, GetPrice_Nemo_Fail_Invalid_Code) {
+	// arrange
+	NiceMock<MockDriver> mockDriver;
+	EXPECT_CALL(mockDriver, getPrice(INVALID_CODE))
+		.WillRepeatedly(Return(ZERO));
+
+	BrokerManager brokerManager;
+	brokerManager.setDriver(&mockDriver);
+
+	// act
+	brokerManager.selectStockBroker(NEMO);
+	int actual = brokerManager.getPrice(INVALID_CODE);
+
+
+	// assert
+	EXPECT_EQ(actual, ZERO);
+}
+
+TEST_F(TradingSystemFixture, GetPrice_Nemo_Success) {
+	// arrange
+	NiceMock<MockDriver> mockDriver;
+	EXPECT_CALL(mockDriver, getPrice(STOCK_CODE))
+		.WillRepeatedly(Return(PRICE));
+
+	BrokerManager brokerManager;
+	brokerManager.setDriver(&mockDriver);
+
+	// act
+	brokerManager.selectStockBroker(NEMO);
+	int actual = brokerManager.getPrice(STOCK_CODE);
+
+
+	// assert
+	EXPECT_EQ(actual, PRICE);
 }
