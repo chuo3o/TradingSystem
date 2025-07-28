@@ -1,14 +1,14 @@
 #include <iostream>
 #include <stdexcept>
 #include "gmock/gmock.h"
-#include "StockerBrocker.cpp"
+#include "StockerBroker.cpp"
 
 using namespace testing;
 using namespace std;
 
 class StockMock : public IStockBroker {
 public:
-	MOCK_METHOD(void, selectStockBrocker, (string id), (override));
+	MOCK_METHOD(void, selectStockBroker, (string id), (override));
 	MOCK_METHOD(bool, login, (string id, string pw), (override));
 	MOCK_METHOD(bool, buy, (int stockCode, int price, int qty), (override));
 	MOCK_METHOD(bool, sell, (int stockCode, int price, int qty), (override));
@@ -87,24 +87,24 @@ private:
 
 TEST_F(TradingSystemFixture, Select_Stock_Fail) {
 
-	EXPECT_CALL(stockmock, selectStockBrocker)
+	EXPECT_CALL(stockmock, selectStockBroker)
 		.Times(1)
 		.WillOnce(testing::Throw(std::invalid_argument("invalid ID")));
 
 	EXPECT_THROW(
-		{ stockmock.selectStockBrocker(INVALID); },
+		{ stockmock.selectStockBroker(INVALID); },
 		invalid_argument);
 }
 
 TEST_F(TradingSystemFixture, Select_Kiwer_Success) {
-	EXPECT_CALL(stockmock, selectStockBrocker)
+	EXPECT_CALL(stockmock, selectStockBroker)
 		.Times(1);
 
 	EXPECT_CALL(stockmock, getID)
 		.Times(1)
 		.WillOnce(Return("KIWER"));
 
-	stockmock.selectStockBrocker(KIWER);
+	stockmock.selectStockBroker(KIWER);
 	EXPECT_EQ(stockmock.getID(), KIWER);
 }
 
@@ -115,7 +115,7 @@ TEST_F(TradingSystemFixture, Select_Nemo_Success) {
 	EXPECT_CALL(stockmock, getID)
 		.Times(1)
 		.WillOnce(Return("NEMO"));
-	stockmock.selectStockBrocker(NEMO);
+	stockmock.selectStockBroker(NEMO);
 	EXPECT_EQ(stockmock.getID(), NEMO);
 
 }

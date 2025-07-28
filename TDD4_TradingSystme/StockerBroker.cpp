@@ -10,7 +10,7 @@ public:
     const string KIWER = "KIWER";
     const string NEMO = "NEMO";
 
-    virtual void selectStockBrocker(string id) = 0;
+    virtual void selectStockBroker(string id) = 0;
 
     virtual bool login(string id, string pw) = 0;
     virtual bool buy(int stockCode, int price, int qty) = 0;
@@ -22,7 +22,7 @@ public:
 class BrokerManager : public IStockBroker
 {
 public:
-    void selectStockBrocker(string id) { 
+    void selectStockBroker(string id) { 
 
         if (id == KIWER)
         {
