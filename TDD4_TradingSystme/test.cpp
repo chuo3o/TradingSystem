@@ -23,6 +23,12 @@ public:
 	const string NEMO = "NEMO";
 	const string USER = "USER";
 	const string PASSWORD = "PASSWORD";
+	const int STOCK_CODE = 1;
+	const int PRICE = 10000;
+	const int QUANTITY = 10;
+	const int ZERO = 0;
+
+
 
 	StockMock stockmock;
 
@@ -84,7 +90,7 @@ private:
 
 ///////////////  1. Select Stock  ///////////////
 
-
+/// 1.1 FAIL
 TEST_F(TradingSystemFixture, Select_Stock_Fail) {
 
 	EXPECT_CALL(stockmock, selectStockBroker)
@@ -96,6 +102,7 @@ TEST_F(TradingSystemFixture, Select_Stock_Fail) {
 		invalid_argument);
 }
 
+/// 1.2 KIWER
 TEST_F(TradingSystemFixture, Select_Kiwer_Success) {
 	EXPECT_CALL(stockmock, selectStockBroker)
 		.Times(1);
@@ -108,6 +115,7 @@ TEST_F(TradingSystemFixture, Select_Kiwer_Success) {
 	EXPECT_EQ(stockmock.getID(), KIWER);
 }
 
+/// 1.3 NEMO
 TEST_F(TradingSystemFixture, Select_Nemo_Success) {
 	EXPECT_CALL(stockmock, selectStockBroker)
 		.Times(1);
@@ -123,6 +131,8 @@ TEST_F(TradingSystemFixture, Select_Nemo_Success) {
 
 
 ///////////////     2. Login     ///////////////
+
+/// 2.1 KIWER
 TEST_F(TradingSystemFixture, Login_Kiwer_Fail_Invalid_UserID) {
 	EXPECT_THROW(
 		{ getLoginMsg(false, KIWER, INVALID, PASSWORD); },
@@ -142,6 +152,7 @@ TEST_F(TradingSystemFixture, Login_Kiwer_Success) {
 	EXPECT_EQ(loginMsg, getKiwerLoginMsg(USER, PASSWORD));
 }
 
+/// 2.2 NEMO
 TEST_F(TradingSystemFixture, Login_Nemo_Fail_Invalid_UserID) {
 	EXPECT_THROW(
 		{ getLoginMsg(false, NEMO, INVALID, PASSWORD); },
@@ -159,4 +170,90 @@ TEST_F(TradingSystemFixture, Login_Nemo_Fail_Invalid_Password) {
 TEST_F(TradingSystemFixture, Login_Nemo_Success) {
 	std::string loginMsg = getLoginMsg(true, NEMO, USER, PASSWORD);
 	EXPECT_EQ(loginMsg, getNemoLoginMsg(USER, PASSWORD));
+}
+
+
+///////////////     3. Buying     ///////////////
+
+/// 3.1 KIWER
+TEST_F(TradingSystemFixture, Buying_Kiwer_Fail_Invalid_Code) {
+	EXPECT_CALL(StockMock, buy)
+		.Times(1)
+		.WillOnceReturn(false);
+
+	stock = stockbrocker.selectStockBrocker(KIWER);
+
+	EXPECT_EQ(stock->buy(ZERO, PRICE, QUANTITY), false);
+}
+
+TEST_F(TradingSystemFixture, Buying_Kiwer_Fail_Invalid_Price) {
+	EXPECT_CALL(StockMock, buy)
+		.Times(1)
+		.WillOnceReturn(false);
+
+	stock = stockbrocker.selectStockBrocker(KIWER);
+
+	EXPECT_EQ(stock->buy(STOCK_CODE, ZERO, QUANTITY), false);
+}
+
+TEST_F(TradingSystemFixture, Buying_Kiwer_Fail_Invalid_Quantity) {
+	EXPECT_CALL(StockMock, buy)
+		.Times(1)
+		.WillOnceReturn(false);
+
+	stock = stockbrocker.selectStockBrocker(KIWER);
+
+	EXPECT_EQ(stock->buy(STOCK_CODE, PRICE, ZERO), false);
+}
+
+TEST_F(TradingSystemFixture, Buying_Kiwer_Success) {
+	EXPECT_CALL(StockMock, buy)
+		.Times(1)
+		.WillOnceReturn(true);
+
+	stock = stockbrocker.selectStockBrocker(KIWER);
+
+	EXPECT_EQ(stock->buy(STOCK_CODE, PRICE, QUANTITY), true);
+}
+
+
+/// 3.2 NEMO
+TEST_F(TradingSystemFixture, Buying_Nemo_Fail_Invalid_Code) {
+	EXPECT_CALL(StockMock, buy)
+		.Times(1)
+		.WillOnceReturn(false);
+
+	stock = stockbrocker.selectStockBrocker(KIWER);
+
+	EXPECT_EQ(stock->buy(ZERO, PRICE, QUANTITY), false);
+}
+
+TEST_F(TradingSystemFixture, Buying_Nemo_Fail_Invalid_Price) {
+	EXPECT_CALL(StockMock, buy)
+		.Times(1)
+		.WillOnceReturn(false);
+
+	stock = stockbrocker.selectStockBrocker(KIWER);
+
+	EXPECT_EQ(stock->buy(STOCK_CODE, ZERO, QUANTITY), false);
+}
+
+TEST_F(TradingSystemFixture, Buying_Nemo_Fail_Invalid_Quantity) {
+	EXPECT_CALL(StockMock, buy)
+		.Times(1)
+		.WillOnceReturn(false);
+
+	stock = stockbrocker.selectStockBrocker(KIWER);
+
+	EXPECT_EQ(stock->buy(STOCK_CODE, PRICE, ZERO), false);
+}
+
+TEST_F(TradingSystemFixture, Buying_Nemo_Success) {
+	EXPECT_CALL(StockMock, buy)
+		.Times(1)
+		.WillOnceReturn(true);
+
+	stock = stockbrocker.selectStockBrocker(KIWER);
+
+	EXPECT_EQ(stock->buy(STOCK_CODE, PRICE, QUANTITY), true);
 }
