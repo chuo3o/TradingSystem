@@ -11,7 +11,7 @@ public:
 	MOCK_METHOD(bool, login, (string id, string pw), (override));
 	MOCK_METHOD(bool, buy, (int stockCode, int price, int qty), (override));
 	MOCK_METHOD(bool, sell, (int stockCode, int price, int qty), (override));
-	MOCK_METHOD(bool, getPrice, (int stockCode), (override));
+	MOCK_METHOD(int, getPrice, (int stockCode), (override));
 };
 
 class StockBrokerMock : public IStockBroker {
@@ -286,7 +286,7 @@ TEST_F(TradingSystemFixture, Selling_Kiwer_Fail_Invalid_Price) {
 
 	stockBrokermock.selectStockBroker(KIWER);
 
-	EXPECT_EQ(stockmock.buy(STOCK_CODE, ZERO, QUANTITY), false);
+	EXPECT_EQ(stockmock.sell(STOCK_CODE, ZERO, QUANTITY), false);
 }
 
 TEST_F(TradingSystemFixture, Selling_Kiwer_Fail_Invalid_Quantity_Zero) {
@@ -312,7 +312,7 @@ TEST_F(TradingSystemFixture, Selling_Kiwer_Fail_Invalid_Quantity_Over) {
 TEST_F(TradingSystemFixture, Selling_Kiwer_Success) {
 	EXPECT_CALL(stockmock, sell)
 		.Times(1)
-		.WillOnce(Return(false));
+		.WillOnce(Return(true));
 
 	stockBrokermock.selectStockBroker(KIWER);
 

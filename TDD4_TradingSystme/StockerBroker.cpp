@@ -13,7 +13,7 @@ public:
     virtual bool login(string id, string pw) = 0;
     virtual bool buy(int stockCode, int price, int qty) = 0;
     virtual bool sell(int stockCode, int price, int qty) = 0;
-    virtual bool getPrice(int stockCode) = 0;
+    virtual int getPrice(int stockCode) = 0;
 };
 
 class IStockBroker
@@ -34,18 +34,19 @@ public:
     bool login(string id, string pw)
     {
         std::cout << "[MockStock] -" << id << " login GOOD\n";
+        return true;
     }
     bool buy(int stockCode, int price, int qty)
     {
         std::cout << "[MockStock] -" << stockCode << " : Buy stock ( " << price << " * " << qty << ")\n";
-
+        return true;
     }
     bool sell(int stockCode, int price, int qty)
     {
         std::cout << "[MockStock] -" << stockCode << " : Sell stock ( " << price << " * " << qty << ")\n";
-
+        return true;
     }
-    bool getPrice(int stockCode)
+    int getPrice(int stockCode)
     {
         std::srand(std::time(NULL));
         int ret = std::rand() % 10 * 100 + 5000;
@@ -70,7 +71,7 @@ public:
         string strCode = std::to_string(stockCode);
         api.sell(strCode, qty, price);
     }
-    bool getPrice(int stockCode)
+    int getPrice(int stockCode)
     {
         string strCode = std::to_string(stockCode);
         api.currentPrice(strCode);
@@ -97,7 +98,7 @@ public:
         string strCode = std::to_string(stockCode);
         api.sellingStock(strCode, price, qty);
     }
-    bool getPrice(int stockCode)
+    int getPrice(int stockCode)
     {
         string strCode = std::to_string(stockCode);
         api.getMarketPrice(strCode, DEFAULT_DELAY);
