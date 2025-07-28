@@ -10,10 +10,14 @@ using std::string;
 class IStock
 {
 public:
+    IStock(string name) : name(name) {}
     virtual bool login(string id, string pw) = 0;
     virtual bool buy(int stockCode, int price, int qty) = 0;
     virtual bool sell(int stockCode, int price, int qty) = 0;
     virtual int getPrice(int stockCode) = 0;
+    string getID() { return name; }
+protected:
+    string name;
 };
 
 class IStockBroker
@@ -25,12 +29,12 @@ public:
 
     virtual void selectStockBroker(string name) = 0;
     virtual IStock* getStockBroker() = 0;
-    virtual string getID() = 0;
 };
 
 class MockDriver : public IStock
 {
 public:
+    MockDriver() : IStock("MOCK") {};
     bool login(string id, string pw)
     {
         std::cout << "[MockStock] -" << id << " login GOOD\n";
@@ -57,24 +61,30 @@ public:
 class KiwerDriver : public IStock
 {
 public:
+    KiwerDriver() : IStock("KIWER") {};
     bool login(string id, string pw)
     {
         api.login(id, pw);
+        return true;
     }
     bool buy(int stockCode, int price, int qty)
     {
         string strCode = std::to_string(stockCode);
         api.buy(strCode, qty, price);
+        return true;
+
     }
     bool sell(int stockCode, int price, int qty)
     {
         string strCode = std::to_string(stockCode);
         api.sell(strCode, qty, price);
+        return true;
+
     }
     int getPrice(int stockCode)
     {
         string strCode = std::to_string(stockCode);
-        api.currentPrice(strCode);
+        return api.currentPrice(strCode);
     }
 
 private:
@@ -84,24 +94,29 @@ private:
 class NemoDriver : public IStock
 {
 public:
+    NemoDriver() : IStock("NEMO") {};
     bool login(string id, string pw)
     {
         api.certification(id, pw);
+        return true;
+
     }
     bool buy(int stockCode, int price, int qty)
     {
         string strCode = std::to_string(stockCode);
         api.purchasingStock(strCode, price, qty);
+        return true;
     }
     bool sell(int stockCode, int price, int qty)
     {
         string strCode = std::to_string(stockCode);
         api.sellingStock(strCode, price, qty);
+        return true;
     }
     int getPrice(int stockCode)
     {
         string strCode = std::to_string(stockCode);
-        api.getMarketPrice(strCode, DEFAULT_DELAY);
+        return api.getMarketPrice(strCode, DEFAULT_DELAY);
     }
 
 private:
@@ -141,12 +156,7 @@ public:
 
     IStock* getStockBroker() { return CurrentStock; }
 
-    string getID() {
-        return ID;
-    }
-
 private:
-    string ID;
     IStock* CurrentStock;
 
 };

@@ -5,20 +5,32 @@
 
 using namespace testing;
 using namespace std;
+using std::string;
 
 class StockMock : public IStock {
 public:
+	StockMock() : IStock("StockMock") {}
 	MOCK_METHOD(bool, login, (string id, string pw), (override));
 	MOCK_METHOD(bool, buy, (int stockCode, int price, int qty), (override));
 	MOCK_METHOD(bool, sell, (int stockCode, int price, int qty), (override));
 	MOCK_METHOD(int, getPrice, (int stockCode), (override));
+	MOCK_METHOD(string, getID, (), ());
+
 };
 
 class StockBrokerMock : public IStockBroker {
 public:
 	MOCK_METHOD(void, selectStockBroker, (string id), (override));
 	MOCK_METHOD(IStock*, getStockBroker, (), (override));
-	MOCK_METHOD(string, getID, (), (override));
+};
+
+class MockDriverMock : public MockDriver {
+public:
+	MOCK_METHOD(bool, login, (string id, string pw), ());
+	MOCK_METHOD(bool, buy, (int stockCode, int price, int qty), ());
+	MOCK_METHOD(bool, sell, (int stockCode, int price, int qty), ());
+	MOCK_METHOD(int, getPrice, (int stockCode), ());
+
 };
 
 
@@ -27,6 +39,7 @@ public:
 	const string INVALID = "INVALID";
 	const string KIWER = "KIWER";
 	const string NEMO = "NEMO";
+	const string MOCK = "MOCK";
 	const string USER = "USER";
 	const string PASSWORD = "PASSWORD";
 	const int INVALID_CODE = 0;
@@ -39,29 +52,32 @@ public:
 
 	NiceMock<StockBrokerMock> stockBrokermock;
 	NiceMock<StockMock> stockmock;
+	NiceMock<MockDriverMock> mockDriverMock;
 
-	std::string getKiwerLoginMsg(const std::string & id, const std::string & pw) const {
-		if(id == INVALID) {
+
+
+	string getKiwerLoginMsg(const string& id, const string& pw) const {
+		if (id == INVALID) {
 			throw std::invalid_argument("[KIWER] Wrong ID");
 		}
-		else if(pw == INVALID) {
+		else if (pw == INVALID) {
 			throw std::invalid_argument("[KIWER] Wrong PW");
 		}
-		return id +" login success\n";
+		return id + " login success\n";
 	}
-	std::string getNemoLoginMsg(const std::string &id, const std::string & pw) const {
-		if(id == INVALID) {
+	string getNemoLoginMsg(const string& id, const string& pw) const {
+		if (id == INVALID) {
 			throw std::invalid_argument("[NEMO] Wrong ID");
 		}
-		else if(pw == INVALID) {
+		else if (pw == INVALID) {
 			throw std::invalid_argument("[NEMO] Wrong PW");
 		}
 		return "[NEMO]" + id + " login GOOD\n";
 	}
 
-	std::string getLoginMsg(
-		bool isSuccess, const std::string & brokerType, 
-		const std::string & id, const std::string & pw) {
+	string getLoginMsg(
+		bool isSuccess, const string& brokerType,
+		const string& id, const string& pw) {
 
 		oss.str(""); oss.clear();
 		auto oldCoutStreamBuf = std::cout.rdbuf();
@@ -74,10 +90,10 @@ public:
 		EXPECT_CALL(stockmock, login)
 			.WillOnce(
 				[&]() {
-					if(brokerType == KIWER) {
+					if (brokerType == KIWER) {
 						std::cout << getKiwerLoginMsg(id, pw);
 					}
-					else if(brokerType == NEMO) {
+					else if (brokerType == NEMO) {
 						std::cout << getNemoLoginMsg(id, pw);
 					}
 					else {
@@ -86,7 +102,7 @@ public:
 
 					return isSuccess;
 				}
-			);
+		);
 		EXPECT_EQ(stockmock.login(id, pw), isSuccess);
 
 		std::cout.rdbuf(oldCoutStreamBuf);
@@ -96,8 +112,18 @@ private:
 	std::ostringstream oss;
 };
 
-///////////////  1. Select Stock  ///////////////
+///////////////  0. MockDriver test ///////////////
+TEST_F(TradingSystemFixture, MockDriverMockTC1) 
+{
+	bool ret;
+	BrokerManager bm;
+	bm.selectStockBroker(MOCK);
+	IStock* ist = bm.getStockBroker();
+	ret = ist->login("myID", "1234");
+	EXPECT_EQ(ret, true);
+}
 
+///////////////  1. Select Stock  ///////////////
 /// 1.1 FAIL
 TEST_F(TradingSystemFixture, Select_Stock_Fail) {
 	EXPECT_CALL(stockBrokermock, selectStockBroker)
@@ -114,12 +140,12 @@ TEST_F(TradingSystemFixture, Select_Kiwer_Success) {
 	EXPECT_CALL(stockBrokermock, selectStockBroker)
 		.Times(1);
 
-	EXPECT_CALL(stockBrokermock, getID)
+	EXPECT_CALL(stockmock, getID)
 		.Times(1)
 		.WillOnce(Return("KIWER"));
 
 	stockBrokermock.selectStockBroker(KIWER);
-	EXPECT_EQ(stockBrokermock.getID(), KIWER);
+	EXPECT_EQ(stockmock.getID(), KIWER);
 }
 
 /// 1.3 NEMO
@@ -127,17 +153,46 @@ TEST_F(TradingSystemFixture, Select_Nemo_Success) {
 	EXPECT_CALL(stockBrokermock, selectStockBroker)
 		.Times(1);
 
-	EXPECT_CALL(stockBrokermock, getID)
+	EXPECT_CALL(stockmock, getID)
 		.Times(1)
 		.WillOnce(Return("NEMO"));
 	stockBrokermock.selectStockBroker(NEMO);
-	EXPECT_EQ(stockBrokermock.getID(), NEMO);
+	EXPECT_EQ(stockmock.getID(), NEMO);
+}
+
+///////////////  1-1. Select Stock (Use MockDriver)  ///////////////
+/// 1.1.1 FAIL
+TEST_F(TradingSystemFixture, MockDriver_Select_Stock_Fail) {
+
+	bool ret;
+	BrokerManager bm;
+	EXPECT_THROW(
+		{ bm.selectStockBroker(INVALID); },
+		invalid_argument);
+}
+
+/// 1.1.2 KIWER
+TEST_F(TradingSystemFixture, MockDriver_Select_Kiwer_Success) {
+	bool ret;
+	BrokerManager bm;
+	bm.selectStockBroker(KIWER);
+	IStock* ist = bm.getStockBroker();
+	string name = ist->getID();
+	EXPECT_EQ(name, KIWER);
+}
+
+/// 1.1.3 NEMO
+TEST_F(TradingSystemFixture, MockDriver_Select_Nemo_Success) {
+	bool ret;
+	BrokerManager bm;
+	bm.selectStockBroker(NEMO);
+	IStock* ist = bm.getStockBroker();
+	string name = ist->getID();
+	EXPECT_EQ(name, NEMO);
 }
 
 
-
 ///////////////     2. Login     ///////////////
-
 /// 2.1 KIWER
 TEST_F(TradingSystemFixture, Login_Kiwer_Fail_Invalid_UserID) {
 	EXPECT_THROW(
@@ -154,7 +209,7 @@ TEST_F(TradingSystemFixture, Login_Kiwer_Fail_Invalid_Password) {
 }
 
 TEST_F(TradingSystemFixture, Login_Kiwer_Success) {
-	std::string loginMsg = getLoginMsg(true, KIWER, USER, PASSWORD);
+	string loginMsg = getLoginMsg(true, KIWER, USER, PASSWORD);
 	EXPECT_EQ(loginMsg, getKiwerLoginMsg(USER, PASSWORD));
 }
 
@@ -174,7 +229,7 @@ TEST_F(TradingSystemFixture, Login_Nemo_Fail_Invalid_Password) {
 }
 
 TEST_F(TradingSystemFixture, Login_Nemo_Success) {
-	std::string loginMsg = getLoginMsg(true, NEMO, USER, PASSWORD);
+	string loginMsg = getLoginMsg(true, NEMO, USER, PASSWORD);
 	EXPECT_EQ(loginMsg, getNemoLoginMsg(USER, PASSWORD));
 }
 
