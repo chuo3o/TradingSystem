@@ -13,6 +13,7 @@ public:
 	MOCK_METHOD(bool, buy, (int stockCode, int price, int qty), (override));
 	MOCK_METHOD(bool, sell, (int stockCode, int price, int qty), (override));
 	MOCK_METHOD(bool, getPrice, (int stockCode), (override));
+	MOCK_METHOD(string, getID, (), (override));
 };
 
 class TradingSystemFixture : public Test {
@@ -24,31 +25,48 @@ public:
 	const string PASSWORD = "PASSWORD";
 
 	StockMock stockmock;
+	bool ret;
+
 };
 
 ///////////////  1. Select Stock  ///////////////
 
 TEST_F(TradingSystemFixture, Select_Stock_Fail) {
+
 	EXPECT_CALL(stockmock, selectStockBrocker)
 		.Times(1)
-		.WillOnce(Return(false));
+		.WillOnce(testing::Throw(std::invalid_argument("invalid ID")));
 
 	EXPECT_THROW(
 		{ stockmock.selectStockBrocker(INVALID); },
-		runtime_error);
+		invalid_argument);
 }
 
 TEST_F(TradingSystemFixture, Select_Kiwer_Success) {
-	stockmock.selectStockBrocker(KIWER);
-	//EXPECT_EQ(stockmock.getID(), KIWER);
+	EXPECT_CALL(stockmock, selectStockBrocker)
+		.Times(1)
+		.WillOnce(Return(true));
+
+	EXPECT_CALL(stockmock, getID)
+		.Times(1)
+		.WillOnce(Return("KIWER"));
+
+	ret = stockmock.selectStockBrocker(KIWER);
+	EXPECT_EQ(ret, true);
+	EXPECT_EQ(stockmock.getID(), KIWER);
 }
 
 TEST_F(TradingSystemFixture, Select_Nemo_Success) {
 	EXPECT_CALL(stockmock, selectStockBrocker)
-		.Times(1);
+		.Times(1)
+		.WillOnce(Return(true));
 
-	stockmock.selectStockBrocker(NEMO);
-	//EXPECT_EQ(stockmock.getID(), NEMO);
+	EXPECT_CALL(stockmock, getID)
+		.Times(1)
+		.WillOnce(Return("NEMO"));
+	ret = stockmock.selectStockBrocker(NEMO);
+	EXPECT_EQ(ret, true);
+	EXPECT_EQ(stockmock.getID(), NEMO);
 }
 
 
