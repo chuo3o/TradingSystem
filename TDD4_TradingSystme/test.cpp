@@ -2,6 +2,8 @@
 #include <stdexcept>
 #include "gmock/gmock.h"
 #include "StockerBrocker.cpp"
+#include "NemoDriver.cpp"
+#include "KiwerDriver.cpp"
 
 using namespace testing;
 using namespace std;
@@ -127,4 +129,54 @@ TEST_F(TradingSystemFixture, Login_Nemo_Success) {
 	stockmock.selectStockBrocker(NEMO);
 
 	EXPECT_EQ(stockmock.login(USER, PASSWORD), true);
+}
+
+TEST_F(TradingSystemFixture, BuyFromMockSuccess) {
+	EXPECT_CALL(stockmock, buy)
+		.WillRepeatedly(Return(true));
+
+	EXPECT_EQ(true, stockmock.buy(1, 100, 1));
+	EXPECT_EQ(true, stockmock.buy(2, 1000, 10));
+	EXPECT_EQ(true, stockmock.buy(3, 50, 100));
+}
+
+TEST_F(TradingSystemFixture, BuyFromMockFail) {
+	EXPECT_CALL(stockmock, buy)
+		.WillRepeatedly(Return(false));
+
+	EXPECT_EQ(false, stockmock.buy(-1, 100, 1));
+	EXPECT_EQ(false, stockmock.buy(2, 1000000000, 10));
+	EXPECT_EQ(false, stockmock.buy(3, 50, 1000000000));
+}
+
+TEST_F(TradingSystemFixture, BuyFromNemoSuccess) {
+	NemoStockBroker stock;
+
+	EXPECT_EQ(true, stock.buy(1, 100, 1));
+	EXPECT_EQ(true, stock.buy(2, 1000, 10));
+	EXPECT_EQ(true, stock.buy(3, 50, 100));
+}
+
+TEST_F(TradingSystemFixture, BuyFromNemoFail) {
+	NemoStockBroker stock;
+
+	//EXPECT_EQ(false, stock.buy(-1, 100, 1));
+	//EXPECT_EQ(false, stock.buy(2, 1000000000, 10));
+	//EXPECT_EQ(false, stock.buy(3, 50, 1000000000));
+}
+
+TEST_F(TradingSystemFixture, BuyFromKiwerSuccess) {
+	KiwerStockBroker stock;
+
+	EXPECT_EQ(true, stock.buy(1, 100, 1));
+	EXPECT_EQ(true, stock.buy(2, 1000, 10));
+	EXPECT_EQ(true, stock.buy(3, 50, 100));
+}
+
+TEST_F(TradingSystemFixture, BuyFromKiwerFail) {
+	KiwerStockBroker stock;
+
+	//EXPECT_EQ(false, stock.buy(-1, 100, 1));
+	//EXPECT_EQ(false, stock.buy(2, 1000000000, 10));
+	//EXPECT_EQ(false, stock.buy(3, 50, 1000000000));
 }
