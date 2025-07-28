@@ -129,9 +129,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="StockBrokerManager.cpp" />
-    <ClCompile Include="StockerBrocker.h">
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"> %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
     <ClCompile Include="kiwer_api.cpp" />
     <ClCompile Include="main.cpp">
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'"> %(AdditionalOptions)</AdditionalOptions>
