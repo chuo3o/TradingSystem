@@ -8,7 +8,14 @@ public:
 
 };
 
+TEST_F(TradingSystemFixture, SelectWrongStock) {
 
-TEST_F(TradingSystemFixture, TC1) {
-	EXPECT_EQ(1, 1);
+}
+
+TEST_F(TradingSystemFixture, SelectKiwerSuccess) {
+
+}
+
+TEST_F(TradingSystemFixture, SelectNemoSuccess) {
+
 }
