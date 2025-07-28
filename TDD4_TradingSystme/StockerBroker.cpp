@@ -7,10 +7,10 @@
 
 using std::string;
 
-class IStock
+class IStockBroker
 {
 public:
-    IStock(string name) : name(name) {}
+    IStockBroker(string name) : name(name) {}
     virtual bool login(string id, string pw) = 0;
     virtual bool buy(int stockCode, int price, int qty) = 0;
     virtual bool sell(int stockCode, int price, int qty) = 0;
@@ -20,20 +20,20 @@ protected:
     string name;
 };
 
-class IStockBroker
+class IManageStockBroker
 {
 public:
     const string KIWER = "KIWER";
     const string NEMO = "NEMO";
     const string MOCK = "MOCK";
 
-    virtual IStock* selectStockBroker(string name) = 0;
+    virtual IStockBroker* changeStockBroker(string name) = 0;
 };
 
-class MockDriver : public IStock
+class MockDriver : public IStockBroker
 {
 public:
-    MockDriver() : IStock("MOCK") {};
+    MockDriver() : IStockBroker("MOCK") {};
     bool login(string id, string pw)
     {
         std::cout << "[MockStock] -" << id << " login GOOD\n";
@@ -57,10 +57,10 @@ public:
     }
 };
 
-class KiwerDriver : public IStock
+class KiwerDriver : public IStockBroker
 {
 public:
-    KiwerDriver() : IStock("KIWER") {};
+    KiwerDriver() : IStockBroker("KIWER") {};
     bool login(string id, string pw)
     {
         api.login(id, pw);
@@ -90,10 +90,10 @@ private:
     KiwerAPI api;
 };
 
-class NemoDriver : public IStock
+class NemoDriver : public IStockBroker
 {
 public:
-    NemoDriver() : IStock("NEMO") {};
+    NemoDriver() : IStockBroker("NEMO") {};
     bool login(string id, string pw)
     {
         api.certification(id, pw);
@@ -126,7 +126,7 @@ private:
 class StockFactory
 {
 public:
-    IStock* GenStockDriver(string name)
+    IStockBroker* GenStockDriver(string name)
     {
         if (name == "KIWER")
         {
@@ -145,17 +145,19 @@ public:
     }
 };
 
-class BrokerManager : public IStockBroker
+class StockBrokerManager : public IManageStockBroker
 {
 public:
-    IStock* selectStockBroker(string name) {
+    StockBrokerManager() {}
+    StockBrokerManager(IStockBroker* stock) : CurrentStock(stock) {}
+    IStockBroker* changeStockBroker(string name) {
         StockFactory fotory;
         CurrentStock = fotory.GenStockDriver(name);
         return CurrentStock;
     }
 
 private:
-    IStock* CurrentStock;
+    IStockBroker* CurrentStock;
 
 };
 
@@ -164,24 +166,36 @@ private:
 class AutoTradingSystem
 {
 public:
-    AutoTradingSystem(string StockBroker) {
-        SB = new BrokerManager();
-        ist = SB->selectStockBroker(StockBroker);
+    AutoTradingSystem(IManageStockBroker* bm) : BM(bm) {
     }
     void RunAutoTrading() { 
 
     }
     int buyNiceTiming(int stockCode, int price) {
     
-        // read 3times
-        // check up-comming status
-        // buy all
-        // return bought price
+        int Price[3];
+        int retPrice = 0;
+        int qty = 0;
+        for (int i = 0; i < 3; i++)
+        {
+            Price[i] = ist->getPrice(stockCode);
+        }
+
+        if (Price[0] < Price[1] < Price[2])
+        {
+            qty = price / Price[2];
+            if (qty != 0)
+            {
+                ist->buy(stockCode, price, qty);
+            }
+        }
+
+        return qty;
     }
     int sellNiceTiming(int stockCode, int qty) {
     
     }
 private:
-    IStockBroker* SB;
-    IStock* ist;
+    IManageStockBroker* BM;
+    IStockBroker* ist;
 };
