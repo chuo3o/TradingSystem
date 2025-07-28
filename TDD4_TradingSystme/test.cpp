@@ -53,8 +53,8 @@ public:
 	const int OVER = 10000;
 
 
-	NiceMock<StockBrokerMock> stockBrokermock;
-	NiceMock<StockMock> stockmock;
+	NiceMock<StockBrokerMock> stockBrokerInterfacemock;
+	NiceMock<StockMock> stockInterfacemock;
 	NiceMock<MockDriverMock> mockDriverMock;
 
 	string getKiwerLoginMsg(const string& id, const string& pw) const {
@@ -88,7 +88,7 @@ public:
 		//	.WillOnce(Return(true));
 
 		//stockmock.selectStockBroker(brokerType);
-		EXPECT_CALL(stockmock, login)
+		EXPECT_CALL(stockInterfacemock, login)
 			.WillOnce(
 				[&]() {
 					if (brokerType == KIWER) {
@@ -104,7 +104,7 @@ public:
 					return isSuccess;
 				}
 		);
-		EXPECT_EQ(stockmock.login(id, pw), isSuccess);
+		EXPECT_EQ(stockInterfacemock.login(id, pw), isSuccess);
 
 		std::cout.rdbuf(oldCoutStreamBuf);
 		return oss.str();
@@ -113,13 +113,12 @@ private:
 	std::ostringstream oss;
 };
 
-
 ///////////////  -1. AutoTrandingSystaem ///////////////
 /// -1.1 BuyNiceTime fail
 TEST_F(TradingSystemFixture, AutoTrandingSystaemMock_TC1)
 {
 	// conection mockdriver mock
-	EXPECT_CALL(stockBrokermock, changeStockBroker(MOCK))
+	EXPECT_CALL(stockBrokerInterfacemock, changeStockBroker(MOCK))
 		.Times(1)
 		.WillOnce(Return(&mockDriverMock));
 
@@ -143,7 +142,7 @@ TEST_F(TradingSystemFixture, AutoTrandingSystaemMock_TC1)
 TEST_F(TradingSystemFixture, AutoTrandingSystaemMock_TC2)
 {
 	// conection mockdriver mock
-	EXPECT_CALL(stockBrokermock, changeStockBroker(MOCK))
+	EXPECT_CALL(stockBrokerInterfacemock, changeStockBroker(MOCK))
 		.Times(1)
 		.WillOnce(Return(&mockDriverMock));
 
@@ -174,32 +173,32 @@ TEST_F(TradingSystemFixture, MockDriverMockTC1)
 ///////////////  1. Select Stock  ///////////////
 /// 1.1 FAIL
 TEST_F(TradingSystemFixture, Select_Stock_Fail) {
-	EXPECT_CALL(stockBrokermock, changeStockBroker)
+	EXPECT_CALL(stockBrokerInterfacemock, changeStockBroker)
 		.Times(1)
 		.WillOnce(testing::Throw(std::invalid_argument("invalid ID")));
 
 	EXPECT_THROW(
-		{ stockBrokermock.changeStockBroker(INVALID); },
+		{ stockBrokerInterfacemock.changeStockBroker(INVALID); },
 		invalid_argument);
 }
 
 /// 1.2 KIWER
 TEST_F(TradingSystemFixture, Select_Kiwer_Success) {
-	EXPECT_CALL(stockmock, getID)
+	EXPECT_CALL(stockInterfacemock, getID)
 		.Times(1)
 		.WillOnce(Return("KIWER"));
 
-	stockBrokermock.changeStockBroker(KIWER);
-	EXPECT_EQ(stockmock.getID(), KIWER);
+	stockBrokerInterfacemock.changeStockBroker(KIWER);
+	EXPECT_EQ(stockInterfacemock.getID(), KIWER);
 }
 
 /// 1.3 NEMO
 TEST_F(TradingSystemFixture, Select_Nemo_Success) {
-	EXPECT_CALL(stockmock, getID)
+	EXPECT_CALL(stockInterfacemock, getID)
 		.Times(1)
 		.WillOnce(Return("NEMO"));
-	stockBrokermock.changeStockBroker(NEMO);
-	EXPECT_EQ(stockmock.getID(), NEMO);
+	stockBrokerInterfacemock.changeStockBroker(NEMO);
+	EXPECT_EQ(stockInterfacemock.getID(), NEMO);
 }
 
 ///////////////  1-1. Select Stock (Use MockDriver)  ///////////////
@@ -281,81 +280,81 @@ TEST_F(TradingSystemFixture, Buying_Kiwer_Fail_Invalid_Code) {
 	int stockCode = 0x1234;
 	int price = 1000;
 	int qty = 10l;
-	EXPECT_CALL(stockmock, buy)
+	EXPECT_CALL(stockInterfacemock, buy)
 		.Times(1)
 		.WillOnce(Return(false));
 	
-	EXPECT_EQ(stockmock.buy(ZERO, PRICE, QUANTITY), false);
+	EXPECT_EQ(stockInterfacemock.buy(ZERO, PRICE, QUANTITY), false);
 }
 
 TEST_F(TradingSystemFixture, Buying_Kiwer_Fail_Invalid_Price) {
-	EXPECT_CALL(stockmock, buy)
+	EXPECT_CALL(stockInterfacemock, buy)
 		.Times(1)
 		.WillOnce(Return(false));
 
-	EXPECT_EQ(stockmock.buy(STOCK_CODE, ZERO, QUANTITY), false);
+	EXPECT_EQ(stockInterfacemock.buy(STOCK_CODE, ZERO, QUANTITY), false);
 }
 
 TEST_F(TradingSystemFixture, Buying_Kiwer_Fail_Invalid_Quantity) {
-	EXPECT_CALL(stockmock, buy)
+	EXPECT_CALL(stockInterfacemock, buy)
 		.Times(1)
 		.WillOnce(Return(false));
 
-	stockBrokermock.changeStockBroker(KIWER);
+	stockBrokerInterfacemock.changeStockBroker(KIWER);
 
-	EXPECT_EQ(stockmock.buy(STOCK_CODE, PRICE, ZERO), false);
+	EXPECT_EQ(stockInterfacemock.buy(STOCK_CODE, PRICE, ZERO), false);
 }
 
 TEST_F(TradingSystemFixture, Buying_Kiwer_Success) {
-	EXPECT_CALL(stockmock, buy)
+	EXPECT_CALL(stockInterfacemock, buy)
 		.Times(1)
 		.WillOnce(Return(true));
 
-	stockBrokermock.changeStockBroker(KIWER);
+	stockBrokerInterfacemock.changeStockBroker(KIWER);
 
-	EXPECT_EQ(stockmock.buy(STOCK_CODE, PRICE, QUANTITY), true);
+	EXPECT_EQ(stockInterfacemock.buy(STOCK_CODE, PRICE, QUANTITY), true);
 }
 
 
 /// 3.2 NEMO
 TEST_F(TradingSystemFixture, Buying_Nemo_Fail_Invalid_Code) {
-	EXPECT_CALL(stockmock, buy)
+	EXPECT_CALL(stockInterfacemock, buy)
 		.Times(1)
 		.WillOnce(Return(false));
 
-	stockBrokermock.changeStockBroker(NEMO);
+	stockBrokerInterfacemock.changeStockBroker(NEMO);
 
-	EXPECT_EQ(stockmock.buy(ZERO, PRICE, QUANTITY), false);
+	EXPECT_EQ(stockInterfacemock.buy(ZERO, PRICE, QUANTITY), false);
 }
 
 TEST_F(TradingSystemFixture, Buying_Nemo_Fail_Invalid_Price) {
-	EXPECT_CALL(stockmock, buy)
+	EXPECT_CALL(stockInterfacemock, buy)
 		.Times(1)
 		.WillOnce(Return(false));
 
-	stockBrokermock.changeStockBroker(NEMO);
+	stockBrokerInterfacemock.changeStockBroker(NEMO);
 
-	EXPECT_EQ(stockmock.buy(STOCK_CODE, ZERO, QUANTITY), false);
+	EXPECT_EQ(stockInterfacemock.buy(STOCK_CODE, ZERO, QUANTITY), false);
 }
 
 TEST_F(TradingSystemFixture, Buying_Nemo_Fail_Invalid_Quantity) {
-	EXPECT_CALL(stockmock, buy)
+	EXPECT_CALL(stockInterfacemock, buy)
 		.Times(1)
 		.WillOnce(Return(false));
 
-	stockBrokermock.changeStockBroker(NEMO);
+	stockBrokerInterfacemock.changeStockBroker(NEMO);
 
-	EXPECT_EQ(stockmock.buy(STOCK_CODE, PRICE, ZERO), false);
+	EXPECT_EQ(stockInterfacemock.buy(STOCK_CODE, PRICE, ZERO), false);
 }
 
 TEST_F(TradingSystemFixture, Buying_Nemo_Success) {
-	EXPECT_CALL(stockmock, buy)
+	EXPECT_CALL(stockInterfacemock, buy)
 		.Times(1)
 		.WillOnce(Return(true));
 
-	stockBrokermock.changeStockBroker(NEMO);
+	stockBrokerInterfacemock.changeStockBroker(NEMO);
 
-	EXPECT_EQ(stockmock.buy(STOCK_CODE, PRICE, QUANTITY), true);
+	EXPECT_EQ(stockInterfacemock.buy(STOCK_CODE, PRICE, QUANTITY), true);
 }
 
 
@@ -364,105 +363,105 @@ TEST_F(TradingSystemFixture, Buying_Nemo_Success) {
 
 /// 4.1 KIWER
 TEST_F(TradingSystemFixture, Selling_Kiwer_Fail_Invalid_Code) {
-	EXPECT_CALL(stockmock, sell)
+	EXPECT_CALL(stockInterfacemock, sell)
 		.Times(1)
 		.WillOnce(Return(false));
 
-	stockBrokermock.changeStockBroker(KIWER);
+	stockBrokerInterfacemock.changeStockBroker(KIWER);
 
-	EXPECT_EQ(stockmock.sell(INVALID_CODE, PRICE, QUANTITY), false);
+	EXPECT_EQ(stockInterfacemock.sell(INVALID_CODE, PRICE, QUANTITY), false);
 }
 
 TEST_F(TradingSystemFixture, Selling_Kiwer_Fail_Invalid_Price) {
-	EXPECT_CALL(stockmock, sell)
+	EXPECT_CALL(stockInterfacemock, sell)
 		.Times(1)
 		.WillOnce(Return(false));
 
-	stockBrokermock.changeStockBroker(KIWER);
+	stockBrokerInterfacemock.changeStockBroker(KIWER);
 
-	EXPECT_EQ(stockmock.sell(STOCK_CODE, ZERO, QUANTITY), false);
+	EXPECT_EQ(stockInterfacemock.sell(STOCK_CODE, ZERO, QUANTITY), false);
 }
 
 TEST_F(TradingSystemFixture, Selling_Kiwer_Fail_Invalid_Quantity_Zero) {
-	EXPECT_CALL(stockmock, sell)
+	EXPECT_CALL(stockInterfacemock, sell)
 		.Times(1)
 		.WillOnce(Return(false));
 
-	stockBrokermock.changeStockBroker(KIWER);
+	stockBrokerInterfacemock.changeStockBroker(KIWER);
 
-	EXPECT_EQ(stockmock.sell(STOCK_CODE, PRICE, ZERO), false);
+	EXPECT_EQ(stockInterfacemock.sell(STOCK_CODE, PRICE, ZERO), false);
 }
 
 TEST_F(TradingSystemFixture, Selling_Kiwer_Fail_Invalid_Quantity_Over) {
-	EXPECT_CALL(stockmock, sell)
+	EXPECT_CALL(stockInterfacemock, sell)
 		.Times(1)
 		.WillOnce(Return(false));
 
-	stockBrokermock.changeStockBroker(KIWER);
+	stockBrokerInterfacemock.changeStockBroker(KIWER);
 
-	EXPECT_EQ(stockmock.sell(STOCK_CODE, PRICE, OVER), false);
+	EXPECT_EQ(stockInterfacemock.sell(STOCK_CODE, PRICE, OVER), false);
 }
 
 TEST_F(TradingSystemFixture, Selling_Kiwer_Success) {
-	EXPECT_CALL(stockmock, sell)
+	EXPECT_CALL(stockInterfacemock, sell)
 		.Times(1)
 		.WillOnce(Return(true));
 
-	stockBrokermock.changeStockBroker(KIWER);
+	stockBrokerInterfacemock.changeStockBroker(KIWER);
 
-	EXPECT_EQ(stockmock.sell(STOCK_CODE, PRICE, QUANTITY), true);
+	EXPECT_EQ(stockInterfacemock.sell(STOCK_CODE, PRICE, QUANTITY), true);
 }
 
 
 /// 4.2 NEMO
 TEST_F(TradingSystemFixture, Selling_Nemo_Fail_Invalid_Code) {
-	EXPECT_CALL(stockmock, sell)
+	EXPECT_CALL(stockInterfacemock, sell)
 		.Times(1)
 		.WillOnce(Return(false));
 
-	stockBrokermock.changeStockBroker(NEMO);
+	stockBrokerInterfacemock.changeStockBroker(NEMO);
 
-	EXPECT_EQ(stockmock.sell(INVALID_CODE, PRICE, QUANTITY), false);
+	EXPECT_EQ(stockInterfacemock.sell(INVALID_CODE, PRICE, QUANTITY), false);
 }
 
 TEST_F(TradingSystemFixture, Selling_Nemo_Fail_Invalid_Price) {
-	EXPECT_CALL(stockmock, sell)
+	EXPECT_CALL(stockInterfacemock, sell)
 		.Times(1)
 		.WillOnce(Return(false));
 
-	stockBrokermock.changeStockBroker(NEMO);
+	stockBrokerInterfacemock.changeStockBroker(NEMO);
 
-	EXPECT_EQ(stockmock.sell(STOCK_CODE, ZERO, QUANTITY), false);
+	EXPECT_EQ(stockInterfacemock.sell(STOCK_CODE, ZERO, QUANTITY), false);
 }
 
 TEST_F(TradingSystemFixture, Selling_Nemo_Fail_Invalid_Quantity_Zero) {
-	EXPECT_CALL(stockmock, sell)
+	EXPECT_CALL(stockInterfacemock, sell)
 		.Times(1)
 		.WillOnce(Return(false));
 
-	stockBrokermock.changeStockBroker(NEMO);
+	stockBrokerInterfacemock.changeStockBroker(NEMO);
 
-	EXPECT_EQ(stockmock.sell(STOCK_CODE, PRICE, ZERO), false);
+	EXPECT_EQ(stockInterfacemock.sell(STOCK_CODE, PRICE, ZERO), false);
 }
 
 TEST_F(TradingSystemFixture, Selling_Nemo_Fail_Invalid_Quantity_Over) {
-	EXPECT_CALL(stockmock, sell)
+	EXPECT_CALL(stockInterfacemock, sell)
 		.Times(1)
 		.WillOnce(Return(false));
 
-	stockBrokermock.changeStockBroker(NEMO);
+	stockBrokerInterfacemock.changeStockBroker(NEMO);
 
-	EXPECT_EQ(stockmock.sell(STOCK_CODE, PRICE, OVER), false);
+	EXPECT_EQ(stockInterfacemock.sell(STOCK_CODE, PRICE, OVER), false);
 }
 
 TEST_F(TradingSystemFixture, Selling_Nemo_Success) {
-	EXPECT_CALL(stockmock, sell)
+	EXPECT_CALL(stockInterfacemock, sell)
 		.Times(1)
 		.WillOnce(Return(true));
 
-	stockBrokermock.changeStockBroker(NEMO);
+	stockBrokerInterfacemock.changeStockBroker(NEMO);
 
-	EXPECT_EQ(stockmock.sell(STOCK_CODE, PRICE, QUANTITY), true);
+	EXPECT_EQ(stockInterfacemock.sell(STOCK_CODE, PRICE, QUANTITY), true);
 }
 
 
@@ -470,43 +469,43 @@ TEST_F(TradingSystemFixture, Selling_Nemo_Success) {
 
 /// 5.1 KIWER
 TEST_F(TradingSystemFixture, GetPrice_Kiwer_Fail_Invalid_Code) {
-	EXPECT_CALL(stockmock, getPrice)
+	EXPECT_CALL(stockInterfacemock, getPrice)
 		.Times(1)
 		.WillOnce(Return(ZERO));
 
-	stockBrokermock.changeStockBroker(KIWER);
+	stockBrokerInterfacemock.changeStockBroker(KIWER);
 
-	EXPECT_EQ(stockmock.getPrice(INVALID_CODE), ZERO);
+	EXPECT_EQ(stockInterfacemock.getPrice(INVALID_CODE), ZERO);
 }
 
 TEST_F(TradingSystemFixture, GetPrice_Kiwer_Success) {
-	EXPECT_CALL(stockmock, getPrice)
+	EXPECT_CALL(stockInterfacemock, getPrice)
 		.Times(1)
 		.WillOnce(Return(PRICE));
 
-	stockBrokermock.changeStockBroker(KIWER);
+	stockBrokerInterfacemock.changeStockBroker(KIWER);
 
-	EXPECT_EQ(stockmock.getPrice(STOCK_CODE), PRICE);
+	EXPECT_EQ(stockInterfacemock.getPrice(STOCK_CODE), PRICE);
 }
 
 
 /// 5.2 NEMO
 TEST_F(TradingSystemFixture, GetPrice_Nemo_Fail_Invalid_Code) {
-	EXPECT_CALL(stockmock, getPrice)
+	EXPECT_CALL(stockInterfacemock, getPrice)
 		.Times(1)
 		.WillOnce(Return(ZERO));
 
-	stockBrokermock.changeStockBroker(NEMO);
+	stockBrokerInterfacemock.changeStockBroker(NEMO);
 
-	EXPECT_EQ(stockmock.getPrice(INVALID_CODE), 0);
+	EXPECT_EQ(stockInterfacemock.getPrice(INVALID_CODE), 0);
 }
 
 TEST_F(TradingSystemFixture, GetPrice_Nemo_Success) {
-	EXPECT_CALL(stockmock, getPrice)
+	EXPECT_CALL(stockInterfacemock, getPrice)
 		.Times(1)
 		.WillOnce(Return(PRICE));
 
-	stockBrokermock.changeStockBroker(NEMO);
+	stockBrokerInterfacemock.changeStockBroker(NEMO);
 
-	EXPECT_EQ(stockmock.getPrice(STOCK_CODE), PRICE);
+	EXPECT_EQ(stockInterfacemock.getPrice(STOCK_CODE), PRICE);
 }
