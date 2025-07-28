@@ -27,7 +27,7 @@ public:
 	const int PRICE = 10000;
 	const int QUANTITY = 10;
 	const int ZERO = 0;
-
+	const int OVER = 10000;
 
 
 	StockMock stockmock;
@@ -92,6 +92,7 @@ private:
 
 /// 1.1 FAIL
 TEST_F(TradingSystemFixture, Select_Stock_Fail) {
+	EXPECT_CALL(StockMock, selectStockBrocker)
 
 	EXPECT_CALL(stockmock, selectStockBroker)
 		.Times(1)
@@ -179,41 +180,41 @@ TEST_F(TradingSystemFixture, Login_Nemo_Success) {
 TEST_F(TradingSystemFixture, Buying_Kiwer_Fail_Invalid_Code) {
 	EXPECT_CALL(StockMock, buy)
 		.Times(1)
-		.WillOnceReturn(false);
+		.WillOnce(Return(false));
 
-	stock = stockbrocker.selectStockBrocker(KIWER);
+	stockmock.selectStockBrocker(KIWER);
 
-	EXPECT_EQ(stock->buy(ZERO, PRICE, QUANTITY), false);
+	EXPECT_EQ(stockmock.buy(ZERO, PRICE, QUANTITY), false);
 }
 
 TEST_F(TradingSystemFixture, Buying_Kiwer_Fail_Invalid_Price) {
 	EXPECT_CALL(StockMock, buy)
 		.Times(1)
-		.WillOnceReturn(false);
+		.WillOnce(Return(false));
 
-	stock = stockbrocker.selectStockBrocker(KIWER);
+	stockmock.selectStockBrocker(KIWER);
 
-	EXPECT_EQ(stock->buy(STOCK_CODE, ZERO, QUANTITY), false);
+	EXPECT_EQ(stockmock.buy(STOCK_CODE, ZERO, QUANTITY), false);
 }
 
 TEST_F(TradingSystemFixture, Buying_Kiwer_Fail_Invalid_Quantity) {
 	EXPECT_CALL(StockMock, buy)
 		.Times(1)
-		.WillOnceReturn(false);
+		.WillOnce(Return(false));
 
-	stock = stockbrocker.selectStockBrocker(KIWER);
+	stockmock.selectStockBrocker(KIWER);
 
-	EXPECT_EQ(stock->buy(STOCK_CODE, PRICE, ZERO), false);
+	EXPECT_EQ(stockmock.buy(STOCK_CODE, PRICE, ZERO), false);
 }
 
 TEST_F(TradingSystemFixture, Buying_Kiwer_Success) {
 	EXPECT_CALL(StockMock, buy)
 		.Times(1)
-		.WillOnceReturn(true);
+		.WillOnce(Return(true));
 
-	stock = stockbrocker.selectStockBrocker(KIWER);
+	stockmock.selectStockBrocker(KIWER);
 
-	EXPECT_EQ(stock->buy(STOCK_CODE, PRICE, QUANTITY), true);
+	EXPECT_EQ(stockmock.buy(STOCK_CODE, PRICE, QUANTITY), true);
 }
 
 
@@ -221,39 +222,146 @@ TEST_F(TradingSystemFixture, Buying_Kiwer_Success) {
 TEST_F(TradingSystemFixture, Buying_Nemo_Fail_Invalid_Code) {
 	EXPECT_CALL(StockMock, buy)
 		.Times(1)
-		.WillOnceReturn(false);
+		.WillOnce(Return(false));
 
-	stock = stockbrocker.selectStockBrocker(KIWER);
+	stockmock.selectStockBrocker(NEMO);
 
-	EXPECT_EQ(stock->buy(ZERO, PRICE, QUANTITY), false);
+	EXPECT_EQ(stockmock.buy(ZERO, PRICE, QUANTITY), false);
 }
 
 TEST_F(TradingSystemFixture, Buying_Nemo_Fail_Invalid_Price) {
 	EXPECT_CALL(StockMock, buy)
 		.Times(1)
-		.WillOnceReturn(false);
+		.WillOnce(Return(false));
 
-	stock = stockbrocker.selectStockBrocker(KIWER);
+	stockmock.selectStockBrocker(NEMO);
 
-	EXPECT_EQ(stock->buy(STOCK_CODE, ZERO, QUANTITY), false);
+	EXPECT_EQ(stockmock.buy(STOCK_CODE, ZERO, QUANTITY), false);
 }
 
 TEST_F(TradingSystemFixture, Buying_Nemo_Fail_Invalid_Quantity) {
 	EXPECT_CALL(StockMock, buy)
 		.Times(1)
-		.WillOnceReturn(false);
+		.WillOnce(Return(false));
 
-	stock = stockbrocker.selectStockBrocker(KIWER);
+	stockmock.selectStockBrocker(NEMO);
 
-	EXPECT_EQ(stock->buy(STOCK_CODE, PRICE, ZERO), false);
+	EXPECT_EQ(stockmock.buy(STOCK_CODE, PRICE, ZERO), false);
 }
 
 TEST_F(TradingSystemFixture, Buying_Nemo_Success) {
 	EXPECT_CALL(StockMock, buy)
 		.Times(1)
-		.WillOnceReturn(true);
+		.WillOnce(Return(true));
 
-	stock = stockbrocker.selectStockBrocker(KIWER);
+	stockmock.selectStockBrocker(NEMO);
 
-	EXPECT_EQ(stock->buy(STOCK_CODE, PRICE, QUANTITY), true);
+	EXPECT_EQ(stockmock.buy(STOCK_CODE, PRICE, QUANTITY), true);
+}
+
+
+
+///////////////     4. Selling     ///////////////
+
+/// 4.1 KIWER
+TEST_F(TradingSystemFixture, Selling_Kiwer_Fail_Invalid_Code) {
+	EXPECT_CALL(StockMock, sell)
+		.Times(1)
+		.WillOnce(Return(false));
+
+	stockmock.selectStockBrocker(KIWER);
+
+	EXPECT_EQ(stockmock.sell(ZERO, PRICE, QUANTITY), false);
+}
+
+TEST_F(TradingSystemFixture, Selling_Kiwer_Fail_Invalid_Price) {
+	EXPECT_CALL(StockMock, sell)
+		.Times(1)
+		.WillOnce(Return(false));
+
+	stockmock.selectStockBrocker(KIWER);
+
+	EXPECT_EQ(stockmock.buy(STOCK_CODE, ZERO, QUANTITY), false);
+}
+
+TEST_F(TradingSystemFixture, Selling_Kiwer_Fail_Invalid_Quantity_Zero) {
+	EXPECT_CALL(StockMock, sell)
+		.Times(1)
+		.WillOnce(Return(false));
+
+	stockmock.selectStockBrocker(KIWER);
+
+	EXPECT_EQ(stockmock.sell(STOCK_CODE, PRICE, ZERO), false);
+}
+
+TEST_F(TradingSystemFixture, Selling_Kiwer_Fail_Invalid_Quantity_Over) {
+	EXPECT_CALL(StockMock, sell)
+		.Times(1)
+		.WillOnce(Return(false));
+
+	stockmock.selectStockBrocker(KIWER);
+
+	EXPECT_EQ(stockmock.sell(STOCK_CODE, PRICE, OVER), false);
+}
+
+TEST_F(TradingSystemFixture, Selling_Kiwer_Success) {
+	EXPECT_CALL(StockMock, sell)
+		.Times(1)
+		.WillOnce(Return(false));
+
+	stockmock.selectStockBrocker(KIWER);
+
+	EXPECT_EQ(stockmock.sell(STOCK_CODE, PRICE, QUANTITY), true);
+}
+
+
+/// 4.2 NEMO
+TEST_F(TradingSystemFixture, Selling_Nemo_Fail_Invalid_Code) {
+	EXPECT_CALL(StockMock, sell)
+		.Times(1)
+		.WillOnce(Return(false));
+
+	stockmock.selectStockBrocker(NEMO);
+
+	EXPECT_EQ(stockmock.sell(ZERO, PRICE, QUANTITY), false);
+}
+
+TEST_F(TradingSystemFixture, Selling_Nemo_Fail_Invalid_Price) {
+	EXPECT_CALL(StockMock, sell)
+		.Times(1)
+		.WillOnce(Return(false));
+
+	stockmock.selectStockBrocker(NEMO);
+
+	EXPECT_EQ(stockmock.sell(STOCK_CODE, ZERO, QUANTITY), false);
+}
+
+TEST_F(TradingSystemFixture, Selling_Nemo_Fail_Invalid_Quantity_Zero) {
+	EXPECT_CALL(StockMock, sell)
+		.Times(1)
+		.WillOnce(Return(false));
+
+	stockmock.selectStockBrocker(NEMO);
+
+	EXPECT_EQ(stockmock.sell(STOCK_CODE, PRICE, ZERO), false);
+}
+
+TEST_F(TradingSystemFixture, Selling_Nemo_Fail_Invalid_Quantity_Over) {
+	EXPECT_CALL(StockMock, sell)
+		.Times(1)
+		.WillOnce(Return(false));
+
+	stockmock.selectStockBrocker(NEMO);
+
+	EXPECT_EQ(stockmock.sell(STOCK_CODE, PRICE, OVER), false);
+}
+
+TEST_F(TradingSystemFixture, Selling_Nemo_Success) {
+	EXPECT_CALL(StockMock, sell)
+		.Times(1)
+		.WillOnce(Return(true));
+
+	stockmock.selectStockBrocker(NEMO);
+
+	EXPECT_EQ(stockmock.sell(STOCK_CODE, PRICE, QUANTITY), true);
 }
