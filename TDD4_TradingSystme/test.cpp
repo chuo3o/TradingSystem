@@ -23,6 +23,7 @@ public:
 	const string NEMO = "NEMO";
 	const string USER = "USER";
 	const string PASSWORD = "PASSWORD";
+	const int INVALID_CODE = 0;
 	const int STOCK_CODE = 1;
 	const int PRICE = 10000;
 	const int QUANTITY = 10;
@@ -271,7 +272,7 @@ TEST_F(TradingSystemFixture, Selling_Kiwer_Fail_Invalid_Code) {
 
 	stockmock.selectStockBrocker(KIWER);
 
-	EXPECT_EQ(stockmock.sell(ZERO, PRICE, QUANTITY), false);
+	EXPECT_EQ(stockmock.sell(INVALID_CODE, PRICE, QUANTITY), false);
 }
 
 TEST_F(TradingSystemFixture, Selling_Kiwer_Fail_Invalid_Price) {
@@ -323,7 +324,7 @@ TEST_F(TradingSystemFixture, Selling_Nemo_Fail_Invalid_Code) {
 
 	stockmock.selectStockBrocker(NEMO);
 
-	EXPECT_EQ(stockmock.sell(ZERO, PRICE, QUANTITY), false);
+	EXPECT_EQ(stockmock.sell(INVALID_CODE, PRICE, QUANTITY), false);
 }
 
 TEST_F(TradingSystemFixture, Selling_Nemo_Fail_Invalid_Price) {
@@ -364,4 +365,50 @@ TEST_F(TradingSystemFixture, Selling_Nemo_Success) {
 	stockmock.selectStockBrocker(NEMO);
 
 	EXPECT_EQ(stockmock.sell(STOCK_CODE, PRICE, QUANTITY), true);
+}
+
+
+///////////////     5. Get Price     ///////////////
+
+/// 5.1 KIWER
+TEST_F(TradingSystemFixture, GetPrice_Kiwer_Fail_Invalid_Code) {
+	EXPECT_CALL(StockMock, getPrice)
+		.Times(1)
+		.WillOnce(Return(ZERO));
+
+	stockmock.selectStockBrocker(KIWER);
+
+	EXPECT_EQ(stockmock.getPrice(INVALID_CODE), ZERO);
+}
+
+TEST_F(TradingSystemFixture, GetPrice_Kiwer_Success) {
+	EXPECT_CALL(StockMock, getPrice)
+		.Times(1)
+		.WillOnce(Return(PRICE));
+
+	stockmock.selectStockBrocker(KIWER);
+
+	EXPECT_EQ(stockmock.getPrice(STOCK_CODE), PRICE);
+}
+
+
+/// 5.2 NEMO
+TEST_F(TradingSystemFixture, GetPrice_Nemo_Fail_Invalid_Code) {
+	EXPECT_CALL(StockMock, getPrice)
+		.Times(1)
+		.WillOnce(Return(ZERO));
+
+	stockmock.selectStockBrocker(NEMO);
+
+	EXPECT_EQ(stockmock.getPrice(INVALID_CODE), 0);
+}
+
+TEST_F(TradingSystemFixture, GetPrice_Nemo_Success) {
+	EXPECT_CALL(StockMock, getPrice)
+		.Times(1)
+		.WillOnce(Return(PRICE));
+
+	stockmock.selectStockBrocker(NEMO);
+
+	EXPECT_EQ(stockmock.getPrice(STOCK_CODE), PRICE);
 }
