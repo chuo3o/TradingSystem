@@ -20,8 +20,7 @@ public:
 
 class StockBrokerMock : public IStockBroker {
 public:
-	MOCK_METHOD(void, selectStockBroker, (string id), (override));
-	MOCK_METHOD(IStock*, getStockBroker, (), (override));
+	MOCK_METHOD(IStock*, selectStockBroker, (string id), (override));
 };
 
 class MockDriverMock : public MockDriver {
@@ -31,6 +30,14 @@ public:
 	MOCK_METHOD(bool, sell, (int stockCode, int price, int qty), ());
 	MOCK_METHOD(int, getPrice, (int stockCode), ());
 
+};
+
+class AutoTradingSystemMock : public AutoTradingSystem {
+public:
+	AutoTradingSystemMock() : AutoTradingSystem("MOCK") {}
+	MOCK_METHOD(void, RunAutoTrading, (), ());
+	MOCK_METHOD(int, buyNiceTiming, (int stockCode, int price), ());
+	MOCK_METHOD(int, sellNiceTiming, (int stockCode, int price), ());
 };
 
 
@@ -53,8 +60,7 @@ public:
 	NiceMock<StockBrokerMock> stockBrokermock;
 	NiceMock<StockMock> stockmock;
 	NiceMock<MockDriverMock> mockDriverMock;
-
-
+	NiceMock<AutoTradingSystemMock> autoTradingSystemMock;
 
 	string getKiwerLoginMsg(const string& id, const string& pw) const {
 		if (id == INVALID) {
@@ -112,13 +118,57 @@ private:
 	std::ostringstream oss;
 };
 
+
+///////////////  -1. AutoTrandingSystaem ///////////////
+/// -1.1 BuyNiceTime fail
+TEST_F(TradingSystemFixture, AutoTrandingSystaemMock_TC1)
+{
+	// conection mockdriver mock
+	EXPECT_CALL(stockBrokermock, selectStockBroker(MOCK))
+		.Times(1)
+		.WillOnce(Return(&mockDriverMock));
+
+	EXPECT_CALL(mockDriverMock, getPrice(STOCK_CODE))
+		.Times(3)
+		.WillOnce(Return(1234))
+		.WillOnce(Return(1234))
+		.WillOnce(Return(1234));
+
+	EXPECT_CALL(mockDriverMock, buy)
+		.Times(0);
+
+	autoTradingSystemMock.buyNiceTiming(STOCK_CODE, PRICE);
+}
+
+/// -1.1 BuyNiceTime success
+TEST_F(TradingSystemFixture, AutoTrandingSystaemMock_TC2)
+{
+	// conection mockdriver mock
+	EXPECT_CALL(stockBrokermock, selectStockBroker(MOCK))
+		.Times(1)
+		.WillOnce(Return(&mockDriverMock));
+
+	EXPECT_CALL(mockDriverMock, getPrice(STOCK_CODE))
+		.Times(3)
+		.WillOnce(Return(1234))
+		.WillOnce(Return(2345))
+		.WillOnce(Return(9999));
+
+	EXPECT_CALL(mockDriverMock, buy)
+		.Times(1);
+
+	int expectedRet = (PRICE - (PRICE % 9999));
+	int actualRet = autoTradingSystemMock.buyNiceTiming(STOCK_CODE, PRICE);
+	EXPECT_EQ(expectedRet, actualRet);
+}
+
 ///////////////  0. MockDriver test ///////////////
 TEST_F(TradingSystemFixture, MockDriverMockTC1) 
 {
 	bool ret;
 	BrokerManager bm;
-	bm.selectStockBroker(MOCK);
-	IStock* ist = bm.getStockBroker();
+	
+	IStock* ist = bm.selectStockBroker(MOCK);
 	ret = ist->login("myID", "1234");
 	EXPECT_EQ(ret, true);
 }
@@ -175,8 +225,7 @@ TEST_F(TradingSystemFixture, MockDriver_Select_Stock_Fail) {
 TEST_F(TradingSystemFixture, MockDriver_Select_Kiwer_Success) {
 	bool ret;
 	BrokerManager bm;
-	bm.selectStockBroker(KIWER);
-	IStock* ist = bm.getStockBroker();
+	IStock* ist = bm.selectStockBroker(KIWER);
 	string name = ist->getID();
 	EXPECT_EQ(name, KIWER);
 }
@@ -185,12 +234,10 @@ TEST_F(TradingSystemFixture, MockDriver_Select_Kiwer_Success) {
 TEST_F(TradingSystemFixture, MockDriver_Select_Nemo_Success) {
 	bool ret;
 	BrokerManager bm;
-	bm.selectStockBroker(NEMO);
-	IStock* ist = bm.getStockBroker();
+	IStock* ist = bm.selectStockBroker(NEMO);
 	string name = ist->getID();
 	EXPECT_EQ(name, NEMO);
 }
-
 
 ///////////////     2. Login     ///////////////
 /// 2.1 KIWER

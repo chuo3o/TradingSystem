@@ -27,8 +27,7 @@ public:
     const string NEMO = "NEMO";
     const string MOCK = "MOCK";
 
-    virtual void selectStockBroker(string name) = 0;
-    virtual IStock* getStockBroker() = 0;
+    virtual IStock* selectStockBroker(string name) = 0;
 };
 
 class MockDriver : public IStock
@@ -149,14 +148,40 @@ public:
 class BrokerManager : public IStockBroker
 {
 public:
-    void selectStockBroker(string name) {
+    IStock* selectStockBroker(string name) {
         StockFactory fotory;
         CurrentStock = fotory.GenStockDriver(name);
+        return CurrentStock;
     }
-
-    IStock* getStockBroker() { return CurrentStock; }
 
 private:
     IStock* CurrentStock;
 
+};
+
+
+// app
+class AutoTradingSystem
+{
+public:
+    AutoTradingSystem(string StockBroker) {
+        SB = new BrokerManager();
+        ist = SB->selectStockBroker(StockBroker);
+    }
+    void RunAutoTrading() { 
+
+    }
+    int buyNiceTiming(int stockCode, int price) {
+    
+        // read 3times
+        // check up-comming status
+        // buy all
+        // return bought price
+    }
+    int sellNiceTiming(int stockCode, int qty) {
+    
+    }
+private:
+    IStockBroker* SB;
+    IStock* ist;
 };
